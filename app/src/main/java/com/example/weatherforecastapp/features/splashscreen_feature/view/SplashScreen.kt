@@ -1,4 +1,4 @@
-package com.example.weatherforecastapp.features.splashscreen_feature
+package com.example.weatherforecastapp.features.splashscreen_feature.view
 
 import android.window.SplashScreen
 import androidx.compose.foundation.Image
