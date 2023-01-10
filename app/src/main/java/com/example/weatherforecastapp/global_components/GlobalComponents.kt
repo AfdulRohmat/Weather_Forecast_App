@@ -27,46 +27,51 @@ fun CustomTopBar(
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {}
 ) {
-    TopAppBar(title = {
-        if (isInMainScreen) {
-            Text(
-                text = "${weatherData.city.name}, ${weatherData.city.country}",
-                fontWeight = FontWeight.Bold,
-                color = AppColors.mBlack
-            )
-        } else {
-            Box() {
+    TopAppBar(
+        title = {
+            if (isInMainScreen) {
+                Text(
+                    text = "${weatherData.city.name}, ${weatherData.city.country}",
+                    fontWeight = FontWeight.Bold,
+                    color = AppColors.mBlack
+                )
+            } else {
+                Box() {
 
+                }
             }
-        }
 
-    }, actions = {
-        if (isInMainScreen) {
-            Icon(
-                painter = painterResource(id = R.drawable.search),
-                contentDescription = "search",
-                modifier = Modifier
-                    .size(24.dp),
-                tint = AppColors.mBlack
-            )
-        } else {
-            Box() {
+        },
+        actions = {
+            if (isInMainScreen) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = "search",
+                    modifier = Modifier
+                        .size(24.dp),
+                    tint = AppColors.mBlack
+                )
+            } else {
+                Box() {
 
+                }
             }
-        }
-    }, navigationIcon = {
-        if (isInMainScreen) {
-            Icon(
-                painter = painterResource(id = R.drawable.location),
-                contentDescription = "location",
-                modifier = Modifier
-                    .size(28.dp)
-                    .padding(end = 8.dp)
-            )
-        } else {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "arrow_back")
-        }
+        },
+        navigationIcon = {
+            if (isInMainScreen) {
+                Icon(
+                    painter = painterResource(id = R.drawable.location),
+                    contentDescription = "location",
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(end = 8.dp)
+                )
+            } else {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "arrow_back")
+            }
 
-    }, backgroundColor = AppColors.mWhite)
+        },
+        backgroundColor = AppColors.mWhite, elevation = 0.dp,
+    )
 
 }

@@ -9,4 +9,5 @@ object AppColors {
     val mBlack = Color(0xFF201C1C)
     val mGrey = Color(0xFFFBFBFB)
     val mLightPurple = Color(0xffD2DFFF)
+    val mDarkPurple = Color(0xff9AB6FF)
 }
