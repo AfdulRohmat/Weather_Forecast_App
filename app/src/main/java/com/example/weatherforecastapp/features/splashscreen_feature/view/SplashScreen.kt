@@ -24,11 +24,12 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
+    val defaultCity = "Loderesan"
 
     // DELAY FOR SEVERAL TIME THEN GO TO NEXT PAGE
     LaunchedEffect(key1 = true, block = {
         delay(300L)
-        navController.navigate(WeatherAppScreens.MainScreen.name) {
+        navController.navigate(WeatherAppScreens.MainScreen.name + "/$defaultCity") {
             popUpTo(WeatherAppScreens.SplashScreen.name) {
                 inclusive = true
             }

@@ -10,9 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,8 +19,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,10 +26,12 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.weatherforecastapp.R
 import com.example.weatherforecastapp.R.*
+import com.example.weatherforecastapp.data.DataOrException
 import com.example.weatherforecastapp.features.mainscreen_feature.view_model.MainScreenViewModel
 import com.example.weatherforecastapp.global_components.CustomTopBar
 import com.example.weatherforecastapp.model.weather_api_model.WeatherModel
 import com.example.weatherforecastapp.model.weather_api_model.WeatherObject
+import com.example.weatherforecastapp.navigation.WeatherAppScreens
 import com.example.weatherforecastapp.utils.AppColors
 import com.example.weatherforecastapp.utils.formatDate
 import com.example.weatherforecastapp.utils.formatDateTime
@@ -41,14 +40,23 @@ import java.util.regex.Pattern
 
 @Composable
 fun MainScreen(
-    navController: NavController, mainScreenViewModel: MainScreenViewModel = hiltViewModel()
+    navController: NavController,
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    city: String?
 ) {
-    val weatherData = mainScreenViewModel.data.value.data
 
+    // EXAMPLE TO GET INIT FUNCTION ( JUST LIKE initState() in flutter). GOOD EXAMPLE FOR PARSING REPOSITORY FUNCTION THAT HAVE A PARAMETER
+    val weatherData =
+        produceState<DataOrException<WeatherModel, Boolean, Exception>>(initialValue = DataOrException(
+            loading = true
+        ), producer = {
+            value = mainScreenViewModel.getAllWeatherData(city.toString())
+
+        }).value
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        if (mainScreenViewModel.data.value.loading == true) {
+        if (weatherData.loading == true) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -57,8 +65,8 @@ fun MainScreen(
                 CircularProgressIndicator(color = AppColors.mBlue)
             }
         } else {
-            if (weatherData != null) {
-                MainScreenScaffold(weatherData = weatherData, navController = navController)
+            if (weatherData.data != null) {
+                MainScreenScaffold(weatherData = weatherData.data!!, navController = navController)
             }
         }
 
@@ -72,12 +80,19 @@ fun MainScreen(
 fun MainScreenScaffold(weatherData: WeatherModel, navController: NavController) {
     Scaffold(topBar = {
         CustomTopBar(
-            weatherData = weatherData, navController = navController
+            title = "${weatherData.city.name}, ${weatherData.city.country}",
+            navController = navController,
+            onAddActionClicked = {
+                navController.navigate(WeatherAppScreens.SearchScreen.name)
+
+            }
         )
 
     }) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppColors.mWhite),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
 
@@ -129,7 +144,6 @@ fun MainScreenScaffold(weatherData: WeatherModel, navController: NavController) 
                     )
             }
 
-
             // DAILY WEATHER
             Text(
                 text = "Daily Weather",
@@ -140,6 +154,8 @@ fun MainScreenScaffold(weatherData: WeatherModel, navController: NavController) 
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp
             )
+
+            // LAZY LIST COLUM LIST OF WEATHER
             LazyColumn() {
                 items(items = weatherData.list) { weatherItem ->
                     DailyWeatherTile(weatherData = weatherItem)
@@ -199,15 +215,18 @@ fun DailyWeatherTile(weatherData: WeatherObject) {
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "${formatDate(weatherData.dt).split(",")[0]} (${
-                            weatherData.dt_txt.split(
-                                " "
-                            )[1]
-                        })",
+                        text = formatDate(weatherData.dt),
                         modifier = Modifier.padding(end = 4.dp),
                         color = AppColors.mBlack,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
+                    )
+                    Text(
+                        text = weatherData.dt_txt.split(" ")[1],
+                        modifier = Modifier.padding(end = 4.dp),
+                        color = AppColors.mBlack,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
                     )
                     Text(
                         text = weatherData.weather[0].description,
@@ -223,7 +242,7 @@ fun DailyWeatherTile(weatherData: WeatherObject) {
                 text = "${weatherData.main.temp} °C",
                 color = AppColors.mBlack,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 14.sp
             )
 
 
@@ -391,17 +410,6 @@ fun BoxWeatherData(
                 Text(
                     text = "Last Updated ${date_text[1]}", color = AppColors.mWhite
                 )
-                Icon(
-                    painter = painterResource(id = drawable.refresh),
-                    contentDescription = "refresh",
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clickable {
-
-                        },
-                    tint = AppColors.mWhite
-                )
-
             }
 
 

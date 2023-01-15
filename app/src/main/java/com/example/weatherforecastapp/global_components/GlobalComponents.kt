@@ -1,56 +1,74 @@
 package com.example.weatherforecastapp.global_components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weatherforecastapp.R
-import com.example.weatherforecastapp.model.weather_api_model.WeatherModel
+import com.example.weatherforecastapp.navigation.WeatherAppScreens
 import com.example.weatherforecastapp.utils.AppColors
 
 
 @Composable
 fun CustomTopBar(
-    weatherData: WeatherModel,
+    title: String,
     isInMainScreen: Boolean = true,
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {}
 ) {
+    val showDialog = remember {
+        mutableStateOf(false)
+    }
+
+    if (showDialog.value) {
+        ShowSettingDropDownMenu(showDialog = showDialog, navController = navController)
+    }
+
     TopAppBar(
         title = {
-            if (isInMainScreen) {
-                Text(
-                    text = "${weatherData.city.name}, ${weatherData.city.country}",
-                    fontWeight = FontWeight.Bold,
-                    color = AppColors.mBlack
-                )
-            } else {
-                Box() {
-
-                }
-            }
+            Text(
+                text = title, fontWeight = FontWeight.Bold, color = AppColors.mBlack
+            )
 
         },
         actions = {
             if (isInMainScreen) {
-                Icon(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = "search",
-                    modifier = Modifier
-                        .size(24.dp),
-                    tint = AppColors.mBlack
-                )
+                // SEARCH ICON
+                IconButton(onClick = {
+                    onAddActionClicked()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "search",
+                        modifier = Modifier.size(24.dp),
+                        tint = AppColors.mBlack
+                    )
+                }
+
+                // DROPDOWN ICON
+                IconButton(onClick = {
+                    showDialog.value = !showDialog.value
+
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "dropdown",
+                        modifier = Modifier.size(24.dp),
+                        tint = AppColors.mBlack
+                    )
+                }
+
             } else {
                 Box() {
 
@@ -62,16 +80,86 @@ fun CustomTopBar(
                 Icon(
                     painter = painterResource(id = R.drawable.location),
                     contentDescription = "location",
+                    tint = AppColors.mBlack,
                     modifier = Modifier
                         .size(28.dp)
                         .padding(end = 8.dp)
                 )
             } else {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "arrow_back")
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "arrow_back",
+                        tint = AppColors.mBlack
+                    )
+
+                }
             }
 
         },
         backgroundColor = AppColors.mWhite, elevation = 0.dp,
     )
+
+}
+
+@Composable
+fun ShowSettingDropDownMenu(showDialog: MutableState<Boolean>, navController: NavController) {
+    val dropdownItems = listOf("About", "Favorites", "Settings")
+    val expanded = remember { mutableStateOf(true) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(Alignment.TopEnd)
+            .absolutePadding(top = 45.dp, right = 20.dp)
+    ) {
+
+        DropdownMenu(
+            expanded = expanded.value,
+            onDismissRequest = {
+                expanded.value = false
+                showDialog.value = false
+            },
+            modifier = Modifier
+                .width(140.dp)
+                .background(Color.White)
+        ) {
+            dropdownItems.forEachIndexed { index, eachItem ->
+                DropdownMenuItem(onClick = {
+                    expanded.value = false
+                    showDialog.value = false
+                    navController.navigate(
+                        when (eachItem) {
+                            "About" -> WeatherAppScreens.AboutScreen.name
+                            "Favorites" -> WeatherAppScreens.FavoriteScreen.name
+                            else -> WeatherAppScreens.SettingsScreen.name
+
+                        }
+                    )
+
+                }) {
+                    Icon(
+                        imageVector = when (eachItem) {
+                            "About" -> Icons.Default.Info
+                            "Favorites" -> Icons.Default.FavoriteBorder
+                            else -> Icons.Default.Settings
+
+                        }, contentDescription = null, tint = AppColors.mBlack
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(text = eachItem, fontWeight = FontWeight.W300, color = AppColors.mBlack)
+
+                }
+            }
+
+
+        }
+
+    }
+
 
 }
