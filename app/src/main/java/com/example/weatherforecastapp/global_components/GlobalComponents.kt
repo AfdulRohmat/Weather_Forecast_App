@@ -1,5 +1,6 @@
 package com.example.weatherforecastapp.global_components
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,11 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.weatherforecastapp.R
+import com.example.weatherforecastapp.features.favorites_feature.view_model.FavoriteViewModel
+import com.example.weatherforecastapp.features.favorites_feature.model.FavoriteModel
 import com.example.weatherforecastapp.navigation.WeatherAppScreens
 import com.example.weatherforecastapp.utils.AppColors
 
@@ -25,6 +28,7 @@ fun CustomTopBar(
     isInMainScreen: Boolean = true,
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
     onButtonClicked: () -> Unit = {}
 ) {
     val showDialog = remember {
@@ -40,7 +44,6 @@ fun CustomTopBar(
             Text(
                 text = title, fontWeight = FontWeight.Bold, color = AppColors.mBlack
             )
-
         },
         actions = {
             if (isInMainScreen) {
@@ -59,7 +62,6 @@ fun CustomTopBar(
                 // DROPDOWN ICON
                 IconButton(onClick = {
                     showDialog.value = !showDialog.value
-
                 }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
@@ -77,14 +79,73 @@ fun CustomTopBar(
         },
         navigationIcon = {
             if (isInMainScreen) {
-                Icon(
-                    painter = painterResource(id = R.drawable.location),
-                    contentDescription = "location",
-                    tint = AppColors.mBlack,
-                    modifier = Modifier
-                        .size(28.dp)
-                        .padding(end = 8.dp)
-                )
+                val isAlreadyInFavList =
+                    favoriteViewModel.favoriteList.collectAsState().value.filter { item ->
+                        (item.city) == title.split(",")[0]
+                    }
+
+                val context = LocalContext.current
+
+                if (isAlreadyInFavList.isEmpty()) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "favorite",
+                        tint = Color.Red.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(end = 8.dp)
+                            .clickable {
+                                val dataSplit = title.split(",")
+
+                                favoriteViewModel.addFavorite(
+                                    FavoriteModel(
+                                        city = dataSplit[0],
+                                        country = dataSplit[1]
+                                    )
+                                )
+
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Success added to favorites!",
+                                        Toast.LENGTH_LONG
+                                    )
+                                    .show()
+
+
+                            }
+                    )
+
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "favorite",
+                        tint = Color.Red.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(end = 8.dp)
+                            .clickable {
+                                val dataSplit = title.split(",")
+
+                                favoriteViewModel.deleteFavorite(
+                                    FavoriteModel(
+                                        city = dataSplit[0],
+                                        country = dataSplit[1]
+                                    )
+                                )
+
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Deleted from favorites!",
+                                        Toast.LENGTH_LONG
+                                    )
+                                    .show()
+
+                            }
+                    )
+                }
+
             } else {
                 IconButton(onClick = {
                     navController.popBackStack()
@@ -92,7 +153,8 @@ fun CustomTopBar(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "arrow_back",
-                        tint = AppColors.mBlack
+                        tint = AppColors.mBlack,
+                        modifier = Modifier.padding(end = 8.dp)
                     )
 
                 }

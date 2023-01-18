@@ -29,8 +29,8 @@ import com.example.weatherforecastapp.R.*
 import com.example.weatherforecastapp.data.DataOrException
 import com.example.weatherforecastapp.features.mainscreen_feature.view_model.MainScreenViewModel
 import com.example.weatherforecastapp.global_components.CustomTopBar
-import com.example.weatherforecastapp.model.weather_api_model.WeatherModel
-import com.example.weatherforecastapp.model.weather_api_model.WeatherObject
+import com.example.weatherforecastapp.features.mainscreen_feature.model.weather_api_model.WeatherModel
+import com.example.weatherforecastapp.features.mainscreen_feature.model.weather_api_model.WeatherObject
 import com.example.weatherforecastapp.navigation.WeatherAppScreens
 import com.example.weatherforecastapp.utils.AppColors
 import com.example.weatherforecastapp.utils.formatDate

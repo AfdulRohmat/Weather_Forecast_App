@@ -24,7 +24,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    val defaultCity = "Loderesan"
+    val defaultCity = "Jakarta"
 
     // DELAY FOR SEVERAL TIME THEN GO TO NEXT PAGE
     LaunchedEffect(key1 = true, block = {
